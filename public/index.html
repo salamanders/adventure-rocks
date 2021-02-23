@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Adventure Rocks!</title>
@@ -11,39 +11,78 @@
     <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 
     <script src="/js/adventure-rocks.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+          integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
+          crossorigin="anonymous"/>
 
     <style media="screen">
-      body {
-        font-family: Roboto, Helvetica, Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-      }
+        body {
+            font-family: Roboto, Helvetica, Arial, sans-serif;
+            margin: 1em;
+            padding: 0;
+            text-align: center;
+        }
 
-      .feelings > li {
-        display: inline-block;
-        padding-right: .5em;
-      }
+        section {
+            margin: 1em;
+        }
+
+        ul.feelings {
+            display: inline-block;
+            margin-block: auto;
+            padding-inline: unset;
+        }
+
+        .feelings > li {
+            display: inline-block;
+            background-color: #f6f6ff;
+            border-radius: .2em;
+            padding: 0.1em .1em;
+        }
+
+        #log-visit {
+            display: inline-block;
+            padding: 0.3em 1.2em;
+            margin: 0 0.3em 0.3em 0;
+            border-radius: 2em;
+            box-sizing: border-box;
+            text-decoration: none;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            color: #FFFFFF;
+            background-color: #4eb5f1;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        #log-visit:hover {
+            background-color: #4095c6;
+        }
+
     </style>
-  </head>
-  <body>
-  <h1>Adventure Rocks!</h1>
-  <p>Congratulations on finding <span class="rock-name"></span>!</p>
+</head>
+<body>
+<h1>Adventure Rocks!</h1>
+<p>Congratulations on finding <span class="rock-name"></span>!</p>
 
-  <p>
-    All Adventure Rocks love to travel.
-    Take them with you to somewhere new, log the new place,
-    and leave them out for the next person to find
-    so they can continue their adventure!
-  </p>
+<section>
+    All Adventure Rocks love 🛫 to 🚗 travel 🚞.<br>
+    Take them with you to somewhere 🏝 new 🗽, log the new place 📍,<br>
+    and leave them out for the next person 🙋🏿 to find 😍<br>
+    so they can continue their adventure! 🧭
+</section>
 
-  <p><span class="rock-name"></span> likes:</p>
-  <ul id="rock-likes" class="feelings"></ul>
+<section>
+    <button id="log-visit">📍 Log <span class="rock-name"></span>'s new Location! 🗺</button>
+</section>
 
-  <p><span class="rock-name"></span> is scared of:</p>
-  <ul id="rock-dislikes" class="feelings"></ul>
+<section>
+    <span class="rock-name"></span> likes 👍:
+    <ul id="rock-likes" class="feelings"></ul>,
+    and is scared 😧 of :
+    <ul id="rock-dislikes" class="feelings"></ul>
+</section>
 
-  <button id="log-visit">Log <span class="rock-name"></span>'s new Location!</button>
-  <script> main(); </script>
-  </body>
+<script> main(); </script>
+</body>
 </html>

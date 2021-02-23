@@ -64,7 +64,7 @@ function logVisit() {
             ts: firebase.firestore.FieldValue.serverTimestamp(),
             gps: new firebase.firestore.GeoPoint(latitude, longitude)
         });
-        alert(`Thank you for logging where you left ${rockData.name}!`);
+        alert(`Thank you for moving ${rockData.name} to an exciting new place!`);
     }, error => {
         alertAndLog('Unable to find your location, did you say no to location permissions?');
         console.error(error);
@@ -73,8 +73,8 @@ function logVisit() {
 
 function renderRock() {
     document.querySelectorAll(".rock-name").forEach(nameSpan => nameSpan.textContent = rockData.name);
-    document.getElementById('rock-likes').innerHTML = rockData.likes.map(like => `<li>${like}</li>`).join('');
-    document.getElementById('rock-dislikes').innerHTML = rockData.dislikes.map(dislike => `<li>${dislike}</li>`).join('');
+    document.getElementById('rock-likes').innerHTML = rockData.likes.map(like => `<li>${like}</li>`).join(' ');
+    document.getElementById('rock-dislikes').innerHTML = rockData.dislikes.map(dislike => `<li>${dislike}</li>`).join(' ');
 }
 
 async function main() {
