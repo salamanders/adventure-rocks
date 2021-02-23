@@ -3,6 +3,37 @@
 /*jshint unused:true */
 /*exported main */
 
+
+/**
+ * @type {?firebase.firestore.CollectionReference}
+ */
+let rocksCollection = null;
+
+/**
+ * @type {?firebase.firestore.DocumentReference}
+ */
+let rockDocumentReference = null;
+
+/**
+ * @type {?firebase.firestore.DocumentSnapshot}
+ */
+let rockDocumentSnapshot = null;
+
+/**
+ * @type {?Object}
+ */
+let rockData = null;
+
+
+/**
+ *
+ * @param {string} msg
+ */
+function alertAndLog(msg) {
+    console.error(msg);
+    alert(msg);
+}
+
 const blockUntilDOMReady = () => new Promise(resolve => {
     // Block on document being fully ready, in case we need to build a login button
     if (document.readyState === 'complete') {
@@ -22,35 +53,48 @@ const blockUntilDOMReady = () => new Promise(resolve => {
 
 function logVisit() {
     if (!navigator.geolocation) {
-        const msg = 'Geolocation is not supported by your browser';
-        alert(msg);
-        console.error(msg);
+        alertAndLog('Geolocation is not supported by your browser')
         return;
     }
 
-    navigator.geolocation.getCurrentPosition(position => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
+        await rockDocumentReference.collection('visits').add({
+            ts: firebase.firestore.FieldValue.serverTimestamp(),
+            gps: new firebase.firestore.GeoPoint(latitude, longitude)
+        });
+        alert(`Thank you for logging where you left ${rockData.name}!`);
     }, error => {
-        const msg = 'Unable to find your location, did you say no?';
-        alert(msg);
-        console.error(msg);
+        alertAndLog('Unable to find your location, did you say no to location permissions?');
         console.error(error);
     });
-};
+}
+
+function renderRock() {
+    document.querySelectorAll(".rock-name").forEach(nameSpan => nameSpan.textContent = rockData.name);
+    document.getElementById('rock-likes').innerHTML = rockData.likes.map(like => `<li>${like}</li>`).join('');
+    document.getElementById('rock-dislikes').innerHTML = rockData.dislikes.map(dislike => `<li>${dislike}</li>`).join('');
+}
 
 async function main() {
     await blockUntilDOMReady();
     const path = window.location.pathname;
-    if(path.startsWith('/r/')) {
-      const rockName = path.substr('/r/'.length);
-      console.info(`Rock Name: ${rockName}`);
-      document.querySelectorAll(".rock-name").forEach(nameSpan=>nameSpan.textContent=rockName);
-    }
-    document.getElementById('log-visit').addEventListener('click', logVisit);
-    const fs = firebase.firestore();
+    if (path.startsWith('/r/')) {
+        const rockId = path.substr('/r/'.length)
+            .toLocaleLowerCase()
+            .replace(/[^0-9a-z]+/g, '');
+        console.info(`RockID: ${rockId}`);
 
-    fs.doc(`/rocks/${rockName.toLowerCase()}`).get().then(() => {
-        console.info(`Got a firestore doc.`);
-    });
+
+        rocksCollection = firebase.firestore().collection("rocks");
+        rockDocumentReference = rocksCollection.doc(rockId);
+        rockDocumentSnapshot = await rockDocumentReference.get();
+        document.getElementById('log-visit').addEventListener('click', logVisit);
+        rockData = rockDocumentSnapshot.data();
+        renderRock();
+    } else {
+        alertAndLog('Unsure which rock you found!');
+    }
+
 }

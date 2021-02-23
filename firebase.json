@@ -5,6 +5,8 @@
   },
   "hosting": {
     "public": "public",
+    "cleanUrls": true,
+    "trailingSlash": false,
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -12,7 +14,7 @@
     ],
     "rewrites": [
       {
-        "source": "**",
+        "source": "/r/**",
         "destination": "/index.html"
       }
     ]

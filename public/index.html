@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,8 +11,19 @@
     <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 
     <script src="/js/adventure-rocks.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" />
+
     <style media="screen">
-      body { font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      body {
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .feelings > li {
+        display: inline-block;
+        padding-right: .5em;
+      }
     </style>
   </head>
   <body>
@@ -27,15 +38,12 @@
   </p>
 
   <p><span class="rock-name"></span> likes:</p>
-  <ul id="rock.likes"></ul>
+  <ul id="rock-likes" class="feelings"></ul>
 
   <p><span class="rock-name"></span> is scared of:</p>
-  <ul id="rock.fears"></ul>
+  <ul id="rock-dislikes" class="feelings"></ul>
 
-  <button id="log-visit">Log where you left <span class="rock-name"></span></button>
-
-<script>
-main();
-</script>
+  <button id="log-visit">Log <span class="rock-name"></span>'s new Location!</button>
+  <script> main(); </script>
   </body>
 </html>
