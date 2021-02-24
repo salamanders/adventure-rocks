@@ -6,3 +6,5 @@ dist
 .cache
 /.firebase/
 /.idea/
+/public/firebase-debug.log
+/adventure-rocks.iml

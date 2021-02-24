@@ -16,6 +16,10 @@
       {
         "source": "/r/**",
         "destination": "/index.html"
+      },
+      {
+        "source": "/v/**",
+        "destination": "/index.html"
       }
     ]
   }

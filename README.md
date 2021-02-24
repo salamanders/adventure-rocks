@@ -28,6 +28,7 @@ https://github.com/firebase/quickstart-js/blob/master/database/index.html
 https://github.com/salamanders/adventure-rocks/settings/secrets
 
 https://www.nayuki.io/page/qr-code-generator-library
+Medium Error Correction
 
 
 getmdl.io is old, anything recent?
