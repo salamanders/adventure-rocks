@@ -1,13 +1,30 @@
+# Adventure Rocks 🪨!
 
+Kids release painted rocks on an epic journey.
 
+To play:
+
+1. Paint a rock!
+2. Name your rock and figure out what the rock likes and dislikes.
+3. Print out a 2cm QR code
+4. Glue the QR code to the bottom of the rock, and waterproof the heck out of it.
+
+## Goals
+
+- [x] Get demo running: https://adventure-rocks.web.app/v/SkyMap
+- [ ] Release rock 0 (SkyMap)
+- [ ] Easier "Add a rock" page
+- [ ] Smart initial zoom
+- [ ] Rock portraits (to be sure you have the right rock)
 
 ## Development
 
 `firebase ( login | init | serve | deploy )`
 
-Serves: https://adventure-rocks.web.app
+* Serves: https://adventure-rocks.web.app
+* [Database](https://console.firebase.google.com/project/adventure-rocks/firestore/data~2F)
 
-First rock: https://adventure-rocks.web.app/r/SkyMap
+### Schema
 
 * rocks
   * ID=(rock name LC)
@@ -20,15 +37,8 @@ First rock: https://adventure-rocks.web.app/r/SkyMap
 
 ## Notes
 
-https://console.firebase.google.com/project/adventure-rocks/overview
-https://console.firebase.google.com/project/adventure-rocks/firestore/data~2F
-
-https://github.com/firebase/quickstart-js/blob/master/database/index.html
-
-https://github.com/salamanders/adventure-rocks/settings/secrets
-
-https://www.nayuki.io/page/qr-code-generator-library
-Medium Error Correction
-
-
-getmdl.io is old, anything recent?
+* [Database](https://github.com/firebase/quickstart-js/blob/master/database/index.html)
+* [Secrets](https://github.com/salamanders/adventure-rocks/settings/secrets)
+* [QR Code Tool](https://www.nayuki.io/page/qr-code-generator-library) - use Medium Error Correction
+* [Light Material Design buttons](https://mildrenben.github.io/surface/docs/buttons.html)
+* [Background](https://www.myfreetextures.com/worn-parchment-paper-3/)

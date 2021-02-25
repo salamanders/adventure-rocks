@@ -26,12 +26,13 @@
 </head>
 <body>
 <h1>Adventure🪨!</h1>
+<p class="knownRock" id="rockPortrait"></p>
 <p class="knownRock">Congratulations on finding <span class="rockName"></span>🪨!</p>
 
 <section>
   <p>
     All Adventure Rocks love to travel.
-    Take them with you to somewhere new, log the new place 📍,
+    Take them with you to somewhere new, log the new place📍,
     and leave them out for the next person to find😍
     so they can continue their adventure!
   </p>
@@ -49,20 +50,27 @@
   <p>
     If you have a painted rock that wants to go on an adventure,
     <a href="mailto:benjaminhill+adventurerocks@gmail.com?subject=I'd+like+to+add+my+rock!">let me know</a>
-      and I'll tell you how to add it!
+    and I'll tell you how to add it!
   </p>
 </section>
 
 <section class="knownRock haveRock">
-  <button id="log-visit">Log <span class="rockName"></span>🪨's new Location! 📍🗺</button>
+  <button id="log-visit" class="btn" type="button">
+    <span>
+    Log <span class="rockName"></span>🪨's new Location! 📍🗺
+    </span>
+  </button>
 </section>
 
 <section class="knownRock">
-  <span class="rockName"></span>🪨 likes🥰:<ul id="rock-likes" class="feelings"></ul>,
-  but is scared😧 of:<ul id="rock-dislikes" class="feelings"></ul>
+  <span class="rockName"></span>🪨 likes🥰:
+  <ul id="rock-likes" class="feelings"></ul>
+  ,
+  but is scared😧 of:
+  <ul id="rock-dislikes" class="feelings"></ul>
 </section>
 
-<div class="square knownRock">
+<div class="knownRock square">
   <div id="map" class="square-content"></div>
 </div>
 

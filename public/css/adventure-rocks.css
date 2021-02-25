@@ -3,7 +3,8 @@ body {
   margin: 1em;
   padding: 0;
   text-align: center;
-  background-color: #fdd9b5;
+  background-color: #ffe3c9;
+  background-image: url("/img/paper_tile.jpg");
 }
 
 section {
@@ -31,11 +32,42 @@ ul.feelings {
 
 .feelings > li {
   display: inline-block;
-  background-color: #f6f6ff;
+  background-color: #ffc43f;
   border-radius: .2em;
   padding: 0.1em .1em;
 }
 
+
+.btn {
+  position: relative;
+  display: block;
+  margin: 30px auto;
+  padding: 0;
+  overflow: hidden;
+  border-width: 0;
+  outline: none;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+  background-color: #2ecc71;
+  color: #ecf0f1;
+}
+
+.btn:hover, .btn:focus {
+  background-color: #27ae60;
+}
+
+.btn > * {
+  position: relative;
+}
+
+.btn > span {
+  display: block;
+  padding: 12px 24px;
+  white-space: nowrap;
+}
+
+
+/*
 #log-visit {
   display: inline-block;
   padding: 0.3em 1.2em;
@@ -54,7 +86,7 @@ ul.feelings {
 #log-visit:hover {
   background-color: #4095c6;
 }
-
+*/
 .square {
   position: relative;
   width: 95%;
@@ -85,4 +117,10 @@ ul.feelings {
   text-align: right;
   background-color: #D0DAEE;
   font-size: small;
+}
+
+/** Is this allowed? */
+.ol-attribution {
+  font-size: smaller;
+  padding: 0;
 }

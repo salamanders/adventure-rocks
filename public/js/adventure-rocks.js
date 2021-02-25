@@ -58,7 +58,7 @@ const blockUntilDOMReady = () => new Promise(resolve => {
 
 function logVisit() {
   if (!navigator.geolocation) {
-    alertAndLog('Geolocation is not supported by your browser')
+    alertAndLog('Geolocation is not supported by your browser');
     return;
   }
 
@@ -81,15 +81,35 @@ function renderRock() {
   document.getElementById('rock-likes').innerHTML = rockData.likes.map(like => `<li>${like}</li>`).join(' ');
   document.getElementById('rock-dislikes').innerHTML = rockData.dislikes.map(dislike => `<li>${dislike}</li>`).join(' ');
 
+  console.info('Rendering optional portrait');
+  const rockPortrait = new Image();
+  rockPortrait.portraitHolder = document.getElementById('rockPortrait');
+  rockPortrait.onload = () => {
+    rockPortrait.portraitHolder.appendChild(rockPortrait);
+  };
+  rockPortrait.onerror = () => {
+    rockPortrait.portraitHolder.style.visibility = 'hidden';
+    rockPortrait.portraitHolder.style.display = 'none';
+  };
+  rockPortrait.src = `/img/rocks/${rockData.name}.jpg`;
 
+  // If you don't have the rock in hand, no logging a new location!
+  if (!window.location.pathname.startsWith('/r/')) {
+    for (let el of document.querySelectorAll('.haveRock')) {
+      el.style.visibility = 'hidden';
+      el.style.display = 'none';
+    }
+  }
+}
+
+function renderRockRoute() {
   console.group('Rendering route');
-
   const centerLocation = rockVisitsData.reduce((accumulator, currentValue, index, array) => {
     return {
       latitude: accumulator.latitude + currentValue.gps.latitude / array.length,
       longitude: accumulator.longitude + currentValue.gps.longitude / array.length
     };
-  }, {latitude: 0, longitude: 0})
+  }, {latitude: 0, longitude: 0});
 
   const map = new ol.Map({
     target: 'map',
@@ -104,8 +124,9 @@ function renderRock() {
     })
   });
 
-  if(rockVisitsData.length>1) {
-    const coords = rockVisitsData.map(visit=>[visit.gps.longitude, visit.gps.latitude]);
+  console.info(rockVisitsData);
+  if (rockVisitsData.length > 1) {
+    const coords = rockVisitsData.map(visit => [visit.gps.longitude, visit.gps.latitude]);
     console.info(`Visit coords: ${JSON.stringify(coords)}`);
     //const coords = [[-95.36,29.75], [-96.36,30.75]];
     const lineString = new ol.geom.LineString(coords);
@@ -131,21 +152,31 @@ function renderRock() {
   } else {
     console.warn(`Need more than ${rockVisitsData.length} visit!`);
   }
-
-  console.info(rockVisitsData);
   console.groupEnd();
+}
+
+function renderUnknownRock() {
+  console.warn('No rock specified.');
+  firebase.analytics().logEvent('rendering_default');
+
+  for (let el of document.querySelectorAll('.knownRock')) {
+    el.style.visibility = 'hidden';
+    el.style.display = 'none';
+  }
+
+  for (let el of document.querySelectorAll('.unknownRock')) {
+    el.style.visibility = 'visible';
+    el.style.display = 'block';
+  }
 }
 
 async function main() {
   await blockUntilDOMReady();
-  const path = window.location.pathname;
-  if (path.startsWith('/r/') || path.startsWith('/v/')) {
+  const pathMatch = window.location.pathname.match(/^\/([rv])\/([^\/]+)$/i);
+  if (pathMatch) {
     firebase.analytics().logEvent('rendering_rock');
-    const rockId = path.substr('/r/'.length)
-      .toLocaleLowerCase()
-      .replace(/[^0-9a-z]+/g, '');
+    const rockId = pathMatch[2].toLocaleLowerCase().replace(/[^0-9a-z]+/g, '');
     console.info(`RockID: ${rockId}`);
-
     rocksCollection = firebase.firestore().collection("rocks");
     /**
      * @type {?firebase.firestore.DocumentReference}
@@ -157,28 +188,8 @@ async function main() {
     rockVisitsCollection = rockDocumentReference.collection('visits');
     rockVisitsData = (await rockVisitsCollection.get()).docs.map(querySnapshot => querySnapshot.data());
     renderRock();
-
-    // If you don't have the rock in hand, no logging a new location!
-    if(!path.startsWith('/r/')) {
-      for (let el of document.querySelectorAll('.haveRock')) {
-        el.style.visibility = 'hidden';
-        el.style.display = 'none';
-      }
-    }
-
+    renderRockRoute();
   } else {
-    console.warn('No rock specified.');
-    firebase.analytics().logEvent('rendering_default');
-
-    for (let el of document.querySelectorAll('.knownRock')) {
-      el.style.visibility = 'hidden';
-      el.style.display = 'none';
-    }
-
-    for (let el of document.querySelectorAll('.unknownRock')) {
-      el.style.visibility = 'visible'
-      el.style.display = 'block';
-    }
+    renderUnknownRock();
   }
-
 }
