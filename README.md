@@ -12,10 +12,12 @@ To play:
 ## Goals
 
 - [x] Get demo running: https://adventure-rocks.web.app/v/SkyMap
+- [ ] Security
+- [ ] Instagram tag and embed recent snaps!
 - [ ] Release rock 0 (SkyMap)
 - [ ] Easier "Add a rock" page
 - [ ] Smart initial zoom
-- [ ] Rock portraits (to be sure you have the right rock)
+- [x] Rock portraits (to be sure you have the right rock)
 
 ## Development
 

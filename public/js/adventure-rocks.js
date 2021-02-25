@@ -5,6 +5,12 @@
 
 
 /**
+ * @type {?String}
+ */
+let rockId = null;
+
+
+/**
  * @type {?firebase.firestore.CollectionReference}
  */
 let rocksCollection = null;
@@ -85,13 +91,15 @@ function renderRock() {
   const rockPortrait = new Image();
   rockPortrait.portraitHolder = document.getElementById('rockPortrait');
   rockPortrait.onload = () => {
+    console.info('Found a rock portrait.');
     rockPortrait.portraitHolder.appendChild(rockPortrait);
   };
   rockPortrait.onerror = () => {
+    console.warn(`No rock portrait at '${rockPortrait.src}'.`);
     rockPortrait.portraitHolder.style.visibility = 'hidden';
     rockPortrait.portraitHolder.style.display = 'none';
   };
-  rockPortrait.src = `/img/rocks/${rockData.name}.jpg`;
+  rockPortrait.src = `/img/rocks/${rockId}.jpg`;
 
   // If you don't have the rock in hand, no logging a new location!
   if (!window.location.pathname.startsWith('/r/')) {
@@ -128,7 +136,6 @@ function renderRockRoute() {
   if (rockVisitsData.length > 1) {
     const coords = rockVisitsData.map(visit => [visit.gps.longitude, visit.gps.latitude]);
     console.info(`Visit coords: ${JSON.stringify(coords)}`);
-    //const coords = [[-95.36,29.75], [-96.36,30.75]];
     const lineString = new ol.geom.LineString(coords);
     lineString.transform('EPSG:4326', 'EPSG:3857');
     const feature = new ol.Feature({
@@ -175,7 +182,7 @@ async function main() {
   const pathMatch = window.location.pathname.match(/^\/([rv])\/([^\/]+)$/i);
   if (pathMatch) {
     firebase.analytics().logEvent('rendering_rock');
-    const rockId = pathMatch[2].toLocaleLowerCase().replace(/[^0-9a-z]+/g, '');
+    rockId = pathMatch[2].toLocaleLowerCase().replace(/[^0-9a-z]+/g, '');
     console.info(`RockID: ${rockId}`);
     rocksCollection = firebase.firestore().collection("rocks");
     /**

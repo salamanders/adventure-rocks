@@ -24,6 +24,10 @@ section {
   font-weight: bold;
 }
 
+#rockPortrait > img {
+  max-width: 25%;
+}
+
 ul.feelings {
   display: inline-block;
   margin-block: auto;
@@ -66,27 +70,6 @@ ul.feelings {
   white-space: nowrap;
 }
 
-
-/*
-#log-visit {
-  display: inline-block;
-  padding: 0.3em 1.2em;
-  margin: 0 0.3em 0.3em 0;
-  border-radius: 2em;
-  box-sizing: border-box;
-  text-decoration: none;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 600;
-  color: #FFFFFF;
-  background-color: #4eb5f1;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-#log-visit:hover {
-  background-color: #4095c6;
-}
-*/
 .square {
   position: relative;
   width: 95%;
