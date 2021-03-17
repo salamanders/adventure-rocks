@@ -11,13 +11,28 @@ section {
   margin: 1em;
 }
 
-.unknownRock {
+.haveRock {
+  visibility: hidden;
+  display: none;
+}
+
+.knownRock {
+  visibility: hidden;
+  display: none;
+}
+
+.noRock {
   visibility: hidden;
   display: none;
   max-width: 90%;
   background-color: #4eb5f1;
   border-radius: 1em;
   padding: 1em;
+}
+
+.newRock {
+  visibility: hidden;
+  display: none;
 }
 
 .rockName {
@@ -102,8 +117,27 @@ ul.feelings {
   font-size: small;
 }
 
-/** Is this allowed? */
-.ol-attribution {
-  font-size: smaller;
-  padding: 0;
+/* For the newRock form */
+form {
+  width: 80%;
+  margin: 0 auto;
+}
+
+label,
+input {
+  /* In order to define widths */
+  display: inline-block;
+}
+
+label {
+  width: 30%;
+  /* Positions the label text beside the input */
+  text-align: right;
+}
+
+label+input {
+  width: 30%;
+  /* Large margin-right to force the next element to the new-line
+           and margin-left to create a gutter between the label and input */
+  margin: 0 30% 0 4%;
 }

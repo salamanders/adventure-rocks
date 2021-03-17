@@ -1,9 +1,38 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function verifyFields(required, optional) {
+      let allAllowedFields = required.concat(optional);
+      return request.resource.data.keys().hasAll(required) &&
+        request.resource.data.keys().hasOnly(allAllowedFields);
+    }
+
     match /{document=**} {
-      allow read, write: if
-          request.time < timestamp.date(2021, 3, 22);
+      allow read: if request.time < timestamp.date(2021, 5, 22);
+    }
+
+    // Allow the user to create a document only if that document contains a name
+    // location, and city field
+    match /rocks/{rockId}/visits/{visitId} {
+      allow create: if verifyFields(['gps', 'ts'], ['gps', 'ts']) &&
+      request.resource.data.gps is latlng &&
+      request.resource.data.ts is timestamp;
+    }
+
+  }
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /img/rocks/{imageId} {
+      allow read: if true;
+   }
+   match /img/rocks/{imageId} {
+     // Only allow uploads of any image file that's less than 5MB
+     allow write: if request.resource.size < 500 * 1024 &&
+       request.resource.contentType.matches('image/.*');
     }
   }
 }

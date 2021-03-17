@@ -18,8 +18,19 @@ To play:
 - [ ] Easier "Add a rock" page
 - [ ] Smart initial zoom
 - [x] Rock portraits (to be sure you have the right rock)
+- [ ] List of "Track all rocks I have released"
+- [x] Auto Anonymous Auth
+- [ ] Shorter easier QR with u.nu
+
 
 ## Development
+
+Single page site.  Has 4 states:
+
+* knownRock: Viewing a rock's route, but you don't have it.
+* haveRock: You have the rock in your hand AND can log a visit.
+* newRock: Want to release a new rock
+* noRock: I got nothing and just found this site.
 
 `firebase ( login | init | serve | deploy )`
 

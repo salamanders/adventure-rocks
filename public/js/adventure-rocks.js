@@ -1,67 +1,33 @@
-/*globals firebase, ol  */
+/*globals firebase, google, alertAndLog, setCookie, getCookie  */
+/*globals getImageFbStorage, getImageWeb, qrcodegen, QRC, blockUntilDOMReady, displayOneOf */
 /*jshint esversion: 8 */
 /*jshint unused:true */
 /*exported main */
 
-
-/**
- * @type {?String}
- */
+/** @type {?String} */
 let rockId = null;
 
-
-/**
- * @type {?firebase.firestore.CollectionReference}
- */
+/** @type {?firebase.firestore.CollectionReference} */
 let rocksCollection = null;
 
-/**
- * @type {?firebase.firestore.DocumentSnapshot}
- */
+/** @type {?firebase.firestore.DocumentSnapshot} */
 let rockDocumentSnapshot = null;
 
-/**
- * @type {?Object}
- */
+/** @type {?Object} */
 let rockData = null;
 
-
-/**
- * @type {?firebase.firestore.CollectionReference}
- */
+/** @type {?firebase.firestore.CollectionReference} */
 let rockVisitsCollection = null;
 
-/**
- * @type {?Array<Object>}
- */
-let rockVisitsData = null;
+/** @type {boolean} */
+let ableToLogVisit = false;
+
+/** @type {?google.maps.Map} */
+let map = null;
 
 /**
- *
- * @param {string} msg
+ * You have a rock-in-hand and have pressed the button.
  */
-function alertAndLog(msg) {
-  console.error(msg);
-  alert(msg);
-}
-
-const blockUntilDOMReady = () => new Promise(resolve => {
-  // Block on document being fully ready, in case we need to build a login button
-  if (document.readyState === 'complete') {
-    console.info(`Was already ready: document.readyState=${document.readyState}`);
-    resolve();
-    return;
-  }
-  const onReady = () => {
-    console.info(`Document now read: document.readyState=${document.readyState}`);
-    resolve();
-    document.removeEventListener('DOMContentLoaded', onReady, true);
-    window.removeEventListener('load', onReady, true);
-  };
-  document.addEventListener('DOMContentLoaded', onReady, true);
-  window.addEventListener('load', onReady, true);
-});
-
 function logVisit() {
   if (!navigator.geolocation) {
     alertAndLog('Geolocation is not supported by your browser');
@@ -82,121 +48,164 @@ function logVisit() {
   });
 }
 
-function renderRock() {
+
+/**
+ * Ultra light Firestore to HTML
+ *
+ * @return {Promise<void>}
+ */
+async function renderRockText() {
   document.querySelectorAll(".rockName").forEach(nameSpan => nameSpan.textContent = rockData.name);
   document.getElementById('rock-likes').innerHTML = rockData.likes.map(like => `<li>${like}</li>`).join(' ');
   document.getElementById('rock-dislikes').innerHTML = rockData.dislikes.map(dislike => `<li>${dislike}</li>`).join(' ');
+}
 
+/**
+ * Just the rock image
+ *
+ * @return {Promise<void>}
+ */
+async function renderRockPortrait() {
+  const portraitPath = `/img/rocks/${rockId}.jpg`;
   console.info('Rendering optional portrait');
-  const rockPortrait = new Image();
-  rockPortrait.portraitHolder = document.getElementById('rockPortrait');
-  rockPortrait.onload = () => {
-    console.info('Found a rock portrait.');
-    rockPortrait.portraitHolder.appendChild(rockPortrait);
-  };
-  rockPortrait.onerror = () => {
-    console.warn(`No rock portrait at '${rockPortrait.src}'.`);
-    rockPortrait.portraitHolder.style.visibility = 'hidden';
-    rockPortrait.portraitHolder.style.display = 'none';
-  };
-  rockPortrait.src = `/img/rocks/${rockId}.jpg`;
 
-  // If you don't have the rock in hand, no logging a new location!
-  if (!window.location.pathname.startsWith('/r/')) {
-    for (let el of document.querySelectorAll('.haveRock')) {
-      el.style.visibility = 'hidden';
-      el.style.display = 'none';
+  /** @type <?Image> */
+  let portraitImage = null;
+
+  try {
+    portraitImage = await getImageFbStorage(portraitPath);
+  } catch (e) {
+    console.info(`No portrait from FB Storage:${e}.`);
+  }
+
+  if (!portraitImage) {
+    try {
+      portraitImage = await getImageWeb(portraitPath);
+    } catch (e) {
+      console.warn(`No portrait from web-only: '${e}'.`);
     }
+  }
+
+  /** @type HTMLElement */
+  const portraitHolder = document.getElementById('rockPortrait');
+  if (portraitImage) {
+    portraitHolder.appendChild(portraitImage);
+  } else {
+    portraitHolder.style.visibility = 'hidden';
+    portraitHolder.style.display = 'none';
   }
 }
 
-function renderRockRoute() {
+/**
+ * Just the rock's visits on the map.
+ *
+ * @return {Promise<void>}
+ */
+async function renderRockRoute() {
   console.group('Rendering route');
-  const centerLocation = rockVisitsData.reduce((accumulator, currentValue, index, array) => {
-    return {
-      latitude: accumulator.latitude + currentValue.gps.latitude / array.length,
-      longitude: accumulator.longitude + currentValue.gps.longitude / array.length
-    };
-  }, {latitude: 0, longitude: 0});
+  const rockVisitsData = (await rockVisitsCollection.get()).docs.map(querySnapshot => querySnapshot.data());
+  const coords = rockVisitsData.map(visit => new google.maps.LatLng(visit.gps.latitude, visit.gps.longitude));
 
-  const map = new ol.Map({
-    target: 'map',
-    layers: [
-      new ol.layer.Tile({
-        source: new ol.source.OSM()
-      })
-    ],
-    view: new ol.View({
-      center: ol.proj.fromLonLat([centerLocation.longitude, centerLocation.latitude]),
-      zoom: 8
-    })
+  const bounds = new google.maps.LatLngBounds();
+  coords.forEach(coord => bounds.extend(coord));
+  window.bounds = bounds;
+  console.info(`Added ${coords.length} coords to the bounds.`);
+
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: bounds.getCenter(),
+    mapTypeId: "terrain",
+    clickableIcons: false,
+    zoom: 15,
   });
 
-  console.info(rockVisitsData);
-  if (rockVisitsData.length > 1) {
-    const coords = rockVisitsData.map(visit => [visit.gps.longitude, visit.gps.latitude]);
-    console.info(`Visit coords: ${JSON.stringify(coords)}`);
-    const lineString = new ol.geom.LineString(coords);
-    lineString.transform('EPSG:4326', 'EPSG:3857');
-    const feature = new ol.Feature({
-      geometry: lineString,
-      name: 'Line'
-    });
-    const lineStyle = new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: '#52ff33',
-        width: 5
-      })
-    });
-    const source = new ol.source.Vector({
-      features: [feature]
-    });
-    const vector = new ol.layer.Vector({
-      source: source,
-      style: [lineStyle]
-    });
-    map.addLayer(vector);
-  } else {
-    console.warn(`Need more than ${rockVisitsData.length} visit!`);
-  }
+  const flightPath = new google.maps.Polyline({
+    path: coords,
+    geodesic: true,
+    strokeColor: "#00FF00",
+    strokeOpacity: 1.0,
+    strokeWeight: 2,
+  });
+  flightPath.setMap(map);
+  map.fitBounds(bounds, 10);
+  console.info(`Fit the map bounds to ${JSON.stringify(bounds.toJSON())}`);
   console.groupEnd();
 }
 
-function renderUnknownRock() {
-  console.warn('No rock specified.');
-  firebase.analytics().logEvent('rendering_default');
 
-  for (let el of document.querySelectorAll('.knownRock')) {
-    el.style.visibility = 'hidden';
-    el.style.display = 'none';
-  }
+function renderNewRock() {
+  console.warn('Creating a new rock.');
+  firebase.analytics().logEvent('rendering_newrock');
 
-  for (let el of document.querySelectorAll('.unknownRock')) {
-    el.style.visibility = 'visible';
-    el.style.display = 'block';
-  }
+  let qr0 = qrcodegen.QrCode.encodeText(window.location, QRC.Ecc.MEDIUM);
+  const image = new Image();
+  const canvas = document.createElement("canvas");
+  qr0.drawCanvas(8, 4, canvas);
+  image.width = canvas.width;
+  image.height = canvas.height;
+  image.src = canvas.toDataURL("image/png");
+  console.info(`Created QR code of '${window.location}'`);
 }
 
 async function main() {
   await blockUntilDOMReady();
   const pathMatch = window.location.pathname.match(/^\/([rv])\/([^\/]+)$/i);
+
+  /**
+   * Display just one of the possible states, hide the rest.
+   *
+   * @param {string} chosenClass
+   */
+  const displayOneOfRock = (chosenClass) => displayOneOf(chosenClass, ['knownRock', 'haveRock', 'noRock', 'newRock']);
+
   if (pathMatch) {
-    firebase.analytics().logEvent('rendering_rock');
     rockId = pathMatch[2].toLocaleLowerCase().replace(/[^0-9a-z]+/g, '');
     console.info(`RockID: ${rockId}`);
+
+    if (pathMatch[1] === 'r') {
+      // If you arrived directly from a QR code, give super powers then redirect.
+      firebase.analytics().logEvent('setting_qr_cookie', {
+        rockId: rockId
+      });
+      setCookie('ableToLogVisit', 'true', 3);
+      window.location.replace(`/v/${rockId}`);
+      return;
+    }
+
+    await firebase.auth().signInAnonymously(); // auth.user.uid
+    if (getCookie('ableToLogVisit') === 'true') {
+      console.log('The cookie "ableToLogVisit" exists');
+      ableToLogVisit = true;
+    }
+
+    firebase.analytics().logEvent('rendering_rock', {
+      'ableToLogVisit': ableToLogVisit,
+      'rockId': rockId,
+    });
     rocksCollection = firebase.firestore().collection("rocks");
-    /**
-     * @type {?firebase.firestore.DocumentReference}
-     */
+
+    /** @type {?firebase.firestore.DocumentReference} */
     const rockDocumentReference = rocksCollection.doc(rockId);
     rockDocumentSnapshot = await rockDocumentReference.get();
-    document.getElementById('log-visit').addEventListener('click', logVisit);
-    rockData = rockDocumentSnapshot.data();
-    rockVisitsCollection = rockDocumentReference.collection('visits');
-    rockVisitsData = (await rockVisitsCollection.get()).docs.map(querySnapshot => querySnapshot.data());
-    renderRock();
-    renderRockRoute();
+    if (rockDocumentSnapshot.exists) {
+      console.info(`Rock '${rockId}' exists!`);
+      if (ableToLogVisit) {
+        // Good find!  Please log your visit.
+        displayOneOfRock('haveRock');
+      } else {
+        // If you don't have the rock in hand, no logging a new location!
+        displayOneOfRock('knownRock');
+      }
+      document.getElementById('log-visit').addEventListener('click', logVisit);
+      rockData = rockDocumentSnapshot.data();
+      rockVisitsCollection = rockDocumentReference.collection('visits');
+
+      await Promise.all([renderRockText(), renderRockRoute(), renderRockPortrait()]);
+    } else {
+      displayOneOfRock('newRock');
+      // TODO: renderNewRock
+    }
   } else {
-    renderUnknownRock();
+    displayOneOfRock('noRock');
   }
 }
+

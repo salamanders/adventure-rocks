@@ -5,29 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Adventure Rocks!</title>
+  <meta name="author" content="Crowdsourced"/>
+  <meta name="subject" content="An Augmented Reality game where you track the journey of painted rocks using scanned QR codes"/>
+  <meta name="keywords" content="painted rock,painted rocks,QR,game"/>
 
   <script defer src="/__/firebase/8.2.9/firebase-app.js"></script>
   <script defer src="/__/firebase/8.2.9/firebase-auth.js"></script>
   <script defer src="/__/firebase/8.2.9/firebase-firestore.js"></script>
+  <script defer src="/__/firebase/8.2.9/firebase-storage.js"></script>
   <script defer src="/__/firebase/8.2.9/firebase-analytics.js"></script>
   <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 
-  <script src="/js/adventure-rocks.js"></script>
   <link rel="stylesheet" href="/css/normalize.min.css"
         integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
         crossorigin="anonymous"/>
 
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.5.0/css/ol.css"
-        type="text/css">
-  <script defer src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.5.0/build/ol.js"></script>
+  <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtkuRZ3B6F7-vvi_8uqcV84aOAzN-DOa4"></script>
 
-  <link rel="stylesheet" href="/css/adventure-rocks.css">
+  <link rel="stylesheet" media="print" href="/css/new-rock.css" />
+  <script defer src="/js/qrcodegen.js"></script>
+
+  <link rel="stylesheet" media="screen" href="/css/adventure-rocks.css" />
+
+  <script defer src="/js/adventure-rocks.js"></script>
+  <script defer src="/js/utils.js"></script>
 </head>
+
+
 <body>
 <h1>Adventure🪨!</h1>
-<p class="knownRock" id="rockPortrait"></p>
-<p class="knownRock">Congratulations on finding <span class="rockName"></span>🪨!</p>
+<p class="knownRock haveRock" id="rockPortrait"></p>
+
+<p class="knownRock"><span class="rockName"></span>🪨's Journey</p>
+<p class="haveRock">Congratulations on finding <span class="rockName"></span>🪨!</p>
 
 <section>
   <p>
@@ -37,24 +47,52 @@
     so they can continue their adventure!
   </p>
   <p>
-    🛫 🚗 🚞 🏝 🗽
+    🛫 🚗 🚞 🏝 🗽 🧳 ⛺️ 🗺 🌎
   </p>
 </section>
 
-<section class="unknownRock">
+<section class="noRock">
   <p>
     To get started, find an Adventure Rock in your neighborhood and scan the QR code on the bottom of it.<br>
     (Android: Camera → Modes → Lens, iOS: Camera)
   </p>
-
-  <p>
-    If you have a painted rock that wants to go on an adventure,
-    <a href="mailto:benjaminhill+adventurerocks@gmail.com?subject=I'd+like+to+add+my+rock!">let me know</a>
-    and I'll tell you how to add it!
-  </p>
 </section>
 
-<section class="knownRock haveRock">
+<section class="noRock">
+  <p>
+    Even better: If you have a painted rock that wants to go on an adventure,
+    fill out this form and send the rock on their way!
+  </p>
+  <form>
+    <div>
+      <label for="name">Your rock's name:
+        <input id="name" type="text" name="name" required="required">
+        <abbr title="required" aria-label="required">*</abbr>
+      </label>
+    </div>
+
+    <div>
+      <label for="likes">Your rock's likes?
+        <input id="likes" type="text" name="likes" required="required">
+        <abbr title="required" aria-label="required">*</abbr></label>
+        <span style="font-size: small">(two or more things, with commas between them)</span>
+    </div>
+
+    <div>
+      <label for="dislikes">Your rock's dislikes?
+        <input id="dislikes" type="text" name="dislikes" required="required">
+        <abbr title="required" aria-label="required">*</abbr></label>
+        <span style="font-size: small">(two or more things, with commas between them)</span>
+    </div>
+
+  </form>
+</section>
+
+<section class="newRock" id="newRockInstructions">
+TODO NEW ROCK INSTRUCTIONS
+</section>
+
+<section class="haveRock">
   <button id="log-visit" class="btn" type="button">
     <span>
     Log <span class="rockName"></span>🪨's new Location! 📍🗺
@@ -62,7 +100,7 @@
   </button>
 </section>
 
-<section class="knownRock">
+<section class="knownRock haveRock">
   <span class="rockName"></span>🪨 likes🥰:
   <ul id="rock-likes" class="feelings"></ul>
   ,
@@ -70,7 +108,7 @@
   <ul id="rock-dislikes" class="feelings"></ul>
 </section>
 
-<div class="knownRock square">
+<div class="knownRock haveRock square">
   <div id="map" class="square-content"></div>
 </div>
 
@@ -78,6 +116,5 @@
   <a href="mailto:benjaminhill+adventurerocks@gmail.com?subject=I'd+like+to+add+my+rock!">Add your own Adventure🪨</a>
 </div>
 
-<script> main(); </script>
 </body>
 </html>
