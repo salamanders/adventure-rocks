@@ -197,7 +197,7 @@ async function main() {
       }
       document.getElementById('log-visit').addEventListener('click', logVisit);
       rockData = rockDocumentSnapshot.data();
-      rockVisitsCollection = rockDocumentReference.collection('visits');
+      rockVisitsCollection = rockDocumentReference.collection('visits').orderBy('ts');
 
       await Promise.all([renderRockText(), renderRockRoute(), renderRockPortrait()]);
     } else {
