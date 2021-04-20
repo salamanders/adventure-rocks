@@ -103,7 +103,7 @@ async function renderRockPortrait() {
  */
 async function renderRockRoute() {
   console.group('Rendering route');
-  const rockVisitsData = (await rockVisitsCollection.get()).docs.map(querySnapshot => querySnapshot.data());
+  const rockVisitsData = (await rockVisitsCollection.orderBy('ts').get()).docs.map(querySnapshot => querySnapshot.data());
   const coords = rockVisitsData.map(visit => new google.maps.LatLng(visit.gps.latitude, visit.gps.longitude));
 
   const bounds = new google.maps.LatLngBounds();
@@ -131,6 +131,20 @@ async function renderRockRoute() {
   console.groupEnd();
 }
 
+async function renderLatestVisit() {
+  let allVisits = await firebase.firestore().collectionGroup('visits')
+    .orderBy('ts', 'desc')
+    .limit(1)
+    .get();
+  const latestVisitsData = allVisits.docs.map(querySnapshot => querySnapshot.data());
+  const latest = latestVisitsData[0];
+
+  const latestLogElt = document.getElementById('latestLog');
+  latestLogElt.textContent = `An adventure rock was seen on ${latest.ts.toDate().toLocaleDateString()}`;
+  //const plusCodeResp = await fetch(`https://plus.codes/api?address=${latest.gps.latitude},${latest.gps.longitude}`);
+  //const plusCode = await plusCodeResp.json();
+  //console.info(plusCode);
+}
 
 function renderNewRock() {
   console.warn('Creating a new rock.');
@@ -197,7 +211,7 @@ async function main() {
       }
       document.getElementById('log-visit').addEventListener('click', logVisit);
       rockData = rockDocumentSnapshot.data();
-      rockVisitsCollection = rockDocumentReference.collection('visits').orderBy('ts');
+      rockVisitsCollection = rockDocumentReference.collection('visits');
 
       await Promise.all([renderRockText(), renderRockRoute(), renderRockPortrait()]);
     } else {
@@ -206,6 +220,7 @@ async function main() {
     }
   } else {
     displayOneOfRock('noRock');
+    await renderLatestVisit();
   }
 }
 
